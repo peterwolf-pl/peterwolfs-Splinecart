@@ -13,6 +13,10 @@ public enum TrackType {
     ),
     MAGNETIC(2,
             (m, g, p) -> {
+                if (p <= 0) {
+                    double braked = m * TrackFollowerEntity.FRICTION * (1.0 - TrackFollowerEntity.MAGNETIC_BRAKE);
+                    return Math.abs(braked) < TrackFollowerEntity.MAGNETIC_STOP_THRESHOLD ? 0.0 : braked;
+                }
                 double speed = (p / 15.0) * TrackFollowerEntity.MAGNETIC_SPEED_FACTOR;
                 m = (m * TrackFollowerEntity.FRICTION);
                 return m + ((speed - m) * TrackFollowerEntity.MAGNETIC_ACCEL * (1.0 - g));

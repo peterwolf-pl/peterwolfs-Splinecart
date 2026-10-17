@@ -2,7 +2,7 @@ package io.github.foundationgames.splinecart.block.entity;
 
 import io.github.foundationgames.splinecart.Splinecart;
 import io.github.foundationgames.splinecart.SplinecartClient;
-import io.github.foundationgames.splinecart.TrackType;
+import io.github.foundationgames.splinecart.SupportMode;
 import io.github.foundationgames.splinecart.block.TrackTiesBlockEntity;
 import io.github.foundationgames.splinecart.util.Pose;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -18,7 +18,9 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
+import org.joml.Vector3d;
 import net.minecraft.util.LightCoordsUtil;
 
 import java.util.Set;
@@ -31,6 +33,8 @@ public class TrackTiesBlockEntityRenderer implements BlockEntityRenderer<TrackTi
     public static final Identifier POSE_TEXTURE_DEBUG = Splinecart.id("textures/debug.png");
     public static final Identifier SLEEPER_TEXTURE = Identifier.withDefaultNamespace("textures/block/oak_planks.png");
     public static final Identifier CONNECTOR_TEXTURE = Identifier.withDefaultNamespace("textures/block/cauldron_side.png");
+    public static final Identifier STEEL_RAIL_TEXTURE = Identifier.withDefaultNamespace("textures/block/iron_block.png");
+    public static final Identifier STEEL_PILLAR_TEXTURE = Identifier.withDefaultNamespace("textures/block/white_concrete.png");
 
     public TrackTiesBlockEntityRenderer(BlockEntityRendererProvider.Context ctx) {
     }
@@ -48,9 +52,17 @@ public class TrackTiesBlockEntityRenderer implements BlockEntityRenderer<TrackTi
         entity.clientTime += partialTick;
         state.clientTime = entity.clientTime;
         state.estimatedTrackLength = entity.estimatedTrackLength();
-        state.next = entity.next();
+        state.estimatedAltTrackLength = entity.estimatedAltTrackLength();
+        state.nextEndpoint = entity.renderNextEndpoint();
+        state.nextAltEndpoint = entity.renderNextAltEndpoint();
+        state.nextBanking = entity.nextBanking();
+        state.nextAltBanking = entity.nextAltBanking();
+        state.nextSupports = entity.nextSupports();
+        state.nextAltSupports = entity.nextAltSupports();
+        state.steelPillarTs = entity.steelPillarTs();
+        state.steelPillarAltTs = entity.steelPillarAltTs();
         state.prev = entity.prev();
-        state.nextType = entity.nextType();
+        state.prevAlt = entity.prevAlt();
         state.power = entity.power();
     }
 
@@ -66,56 +78,81 @@ public class TrackTiesBlockEntityRenderer implements BlockEntityRenderer<TrackTi
         }
 
         int trackResolution = SplinecartClient.CFG_TRACK_RESOLUTION.get();
-        int segs = trackResolution * Math.max((int) state.estimatedTrackLength, 2);
-
         poseStack.pushPose();
         var pos = state.blockPos;
         poseStack.translate(-pos.getX(), -pos.getY(), -pos.getZ());
 
+        // 1) Render primary branch if present
+        if (state.nextEndpoint != null) {
+            int segs = trackResolution * Math.max((int) state.estimatedTrackLength, 2);
+            renderBranch(state, poseStack, nodeCollector, state.nextEndpoint, state.nextSupports,
+                    state.nextBanking, state.steelPillarTs, segs);
+        }
+
+        // 2) Render alternate branch (switch) if present
+        if (state.nextAltEndpoint != null) {
+            int segsAlt = trackResolution * Math.max((int) state.estimatedAltTrackLength, 2);
+            renderBranch(state, poseStack, nodeCollector, state.nextAltEndpoint, state.nextAltSupports,
+                    state.nextAltBanking, state.steelPillarAltTs, segsAlt);
+        }
+
+        poseStack.popPose();
+    }
+
+    private void renderBranch(TrackTiesRenderState state, PoseStack poseStack, SubmitNodeCollector nodeCollector,
+                              TrackTiesBlockEntity.RenderEndpoint endpoint, SupportMode supports,
+                              boolean banking, double[] steelPillars, int segs) {
         var overlayColor = new Vector3f(WHITEF);
         float[] overlayVOffset = {0};
 
-        int power = state.power;
-
-        if (state.next != null) {
-            var trackType = state.nextType;
-
-            if (trackType.overlay != null) {
-                power = Math.max(state.power, state.next.power());
-                trackType.overlay.calculateEffects(power, state.clientTime, overlayColor, overlayVOffset);
-            }
+        var trackType = endpoint.type();
+        if (trackType.overlay != null) {
+            int power = Math.max(state.power, endpoint.power());
+            trackType.overlay.calculateEffects(power, state.clientTime, overlayColor, overlayVOffset);
         }
 
-        // Render main track
+        // Main track
         nodeCollector.submitCustomGeometry(poseStack, RenderTypes.entityCutoutZOffset(getTexture()), (entry, buffer) -> {
             var trackProvider = new TrackRenderer.DirectBufferProvider(buffer);
             TrackRenderer.renderTrack(entry, entry,
                     trackProvider, null,
                     OverlayTexture.NO_OVERLAY, state.lightCoords, segs,
                     0, overlayColor,
-                    state.trackTies, state.prev, state.next);
+                    state.trackTies, state.prev, endpoint);
         });
 
-        if (state.next != null) {
+        // Supports
+        var sleeperStyle = TrackSupportRenderer.sleeperStyle(supports, state.pose, endpoint.pose(), banking);
+        if (sleeperStyle == TrackSupportRenderer.SleeperStyle.WOOD) {
             nodeCollector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(SLEEPER_TEXTURE), (entry, buffer) ->
-                    TrackSupportRenderer.renderSleepers(entry, buffer, OverlayTexture.NO_OVERLAY, segs, state.trackTies, state.next));
+                    TrackSupportRenderer.renderSleepers(entry, buffer, OverlayTexture.NO_OVERLAY, segs,
+                            state.trackTies.getLevel(), state.pose, endpoint.pose(), banking));
+        } else {
             nodeCollector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(CONNECTOR_TEXTURE), (entry, buffer) ->
-                    TrackSupportRenderer.renderConnectors(entry, buffer, OverlayTexture.NO_OVERLAY, segs, state.trackTies, state.next));
+                    TrackSupportRenderer.renderConnectors(entry, buffer, OverlayTexture.NO_OVERLAY, segs,
+                            state.trackTies.getLevel(), state.pose, endpoint.pose(), banking));
+        }
+        if (supports == SupportMode.STEEL) {
+            nodeCollector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(STEEL_RAIL_TEXTURE), (entry, buffer) ->
+                    TrackSupportRenderer.renderThirdRail(entry, buffer, OverlayTexture.NO_OVERLAY, segs,
+                            state.trackTies.getLevel(), state.pose, endpoint.pose(), banking));
+            nodeCollector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(STEEL_PILLAR_TEXTURE), (entry, buffer) ->
+                    TrackSupportRenderer.renderSteelPillars(entry, buffer, OverlayTexture.NO_OVERLAY,
+                            state.trackTies.getLevel(), state.pose, endpoint.pose(),
+                            banking, steelPillars));
         }
 
-        // Render overlay
-        if (state.next != null && state.nextType.overlay != null) {
+        // Overlay
+        if (trackType.overlay != null) {
             nodeCollector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(getTrackOverlayTexture()), (entry, buffer) -> {
                 var overlayProvider = new TrackRenderer.DirectBufferProvider(buffer);
                 TrackRenderer.renderTrack(entry, entry,
                         null, overlayProvider,
                         OverlayTexture.NO_OVERLAY, state.lightCoords, segs,
                         overlayVOffset[0], overlayColor,
-                        state.trackTies, state.prev, state.next);
+                        state.trackTies, state.prev, endpoint);
             });
         }
-
-        poseStack.popPose();
     }
 
     protected Identifier getTexture() {
@@ -129,6 +166,56 @@ public class TrackTiesBlockEntityRenderer implements BlockEntityRenderer<TrackTi
     @Override
     public boolean shouldRenderOffScreen() {
         return true;
+    }
+
+    @Override
+    public boolean shouldRender(TrackTiesBlockEntity entity, Vec3 cameraPos) {
+        var endpoint = entity.renderNextEndpoint();
+        var altEndpoint = entity.renderNextAltEndpoint();
+        if (endpoint == null && altEndpoint == null) {
+            return BlockEntityRenderer.super.shouldRender(entity, cameraPos);
+        }
+
+        var start = entity.pose();
+        var position = new Vector3d();
+        var basis = new org.joml.Matrix3d();
+        var derivative = new Vector3d();
+        double minX = Double.POSITIVE_INFINITY;
+        double minY = Double.POSITIVE_INFINITY;
+        double minZ = Double.POSITIVE_INFINITY;
+        double maxX = Double.NEGATIVE_INFINITY;
+        double maxY = Double.NEGATIVE_INFINITY;
+        double maxZ = Double.NEGATIVE_INFINITY;
+
+        // Include the whole cubic path, not just the origin tie, in the
+        // distance test used by BlockEntityRenderDispatcher.
+        if (endpoint != null) {
+            for (int i = 0; i <= 16; i++) {
+                start.interpolate(endpoint.pose(), (double) i / 16.0, position, basis, derivative);
+                minX = Math.min(minX, position.x());
+                minY = Math.min(minY, position.y());
+                minZ = Math.min(minZ, position.z());
+                maxX = Math.max(maxX, position.x());
+                maxY = Math.max(maxY, position.y());
+                maxZ = Math.max(maxZ, position.z());
+            }
+        }
+        if (altEndpoint != null) {
+            for (int i = 0; i <= 16; i++) {
+                start.interpolate(altEndpoint.pose(), (double) i / 16.0, position, basis, derivative);
+                minX = Math.min(minX, position.x());
+                minY = Math.min(minY, position.y());
+                minZ = Math.min(minZ, position.z());
+                maxX = Math.max(maxX, position.x());
+                maxY = Math.max(maxY, position.y());
+                maxZ = Math.max(maxZ, position.z());
+            }
+        }
+
+        double margin = getViewDistance() + 2.0;
+        return cameraPos.x >= minX - margin && cameraPos.x <= maxX + margin
+                && cameraPos.y >= minY - margin && cameraPos.y <= maxY + margin
+                && cameraPos.z >= minZ - margin && cameraPos.z <= maxZ + margin;
     }
 
     @Override
@@ -171,9 +258,17 @@ public class TrackTiesBlockEntityRenderer implements BlockEntityRenderer<TrackTi
         public Pose pose;
         public float clientTime;
         public double estimatedTrackLength;
-        public TrackTiesBlockEntity next;
+        public double estimatedAltTrackLength;
+        public TrackTiesBlockEntity.RenderEndpoint nextEndpoint;
+        public TrackTiesBlockEntity.RenderEndpoint nextAltEndpoint;
+        public boolean nextBanking;
+        public boolean nextAltBanking;
+        public SupportMode nextSupports = SupportMode.AUTO;
+        public SupportMode nextAltSupports = SupportMode.AUTO;
+        public double[] steelPillarTs = new double[0];
+        public double[] steelPillarAltTs = new double[0];
         public TrackTiesBlockEntity prev;
-        public TrackType nextType;
+        public TrackTiesBlockEntity prevAlt;
         public int power;
     }
 }

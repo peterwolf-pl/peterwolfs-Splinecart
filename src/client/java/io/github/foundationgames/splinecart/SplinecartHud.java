@@ -1,6 +1,8 @@
 package io.github.foundationgames.splinecart;
 
 import io.github.foundationgames.splinecart.block.TrackTiesBlockEntity;
+import io.github.foundationgames.splinecart.item.TrackItem;
+import io.github.foundationgames.splinecart.item.TrackTiesItem;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -20,29 +22,62 @@ public class SplinecartHud implements HudElement {
         var world = client.level;
 
         if (world != null && client.player != null) {
-            var origin = client.player.getMainHandItem().get(Splinecart.ORIGIN_POS);
+            var mainItem = client.player.getMainHandItem();
+            var offItem = client.player.getOffhandItem();
+            var origin = mainItem.get(Splinecart.ORIGIN_POS);
 
             if (origin == null) {
-                origin = client.player.getOffhandItem().get(Splinecart.ORIGIN_POS);
+                origin = offItem.get(Splinecart.ORIGIN_POS);
             }
 
-            if (origin != null && client.hitResult instanceof BlockHitResult hit) {
+            int w = guiGraphics.guiWidth();
+            int h = guiGraphics.guiHeight();
+
+            if (client.hitResult instanceof BlockHitResult hit) {
                 var pos = hit.getBlockPos();
-                if (world.getBlockState(pos).isAir()) {
-                    return;
+                if (!world.getBlockState(pos).isAir() && world.getBlockEntity(pos) instanceof TrackTiesBlockEntity ties) {
+                    boolean holdingBuildingItem = mainItem.getItem() instanceof TrackItem
+                            || offItem.getItem() instanceof TrackItem
+                            || mainItem.getItem() instanceof TrackTiesItem
+                            || offItem.getItem() instanceof TrackTiesItem
+                            || mainItem.isEmpty();
+
+                    if (origin != null) {
+                        var hint = CANCEL;
+                        if (!pos.equals(origin.pos())) {
+                            var originTie = world.getBlockEntity(origin.pos()) instanceof TrackTiesBlockEntity o ? o : null;
+                            if (originTie != null) {
+                                if ((originTie.canAcceptOutgoing() && ties.canAcceptIncoming()) ||
+                                        (ties.canAcceptOutgoing() && originTie.canAcceptIncoming())) {
+                                    hint = CREATE;
+                                }
+                            }
+                        }
+
+                        var text = Component.translatable(RIGHT_CLICK_HINT, client.options.keyUse.getTranslatedKeyMessage(), hint);
+                        guiGraphics.centeredText(client.font, text, w / 2, (h / 2) + 20, 0xFFFFFFFF);
+
+                        Component smoothState = ties.isSmoothing()
+                                ? Component.translatable("hud.splinecart.smoothing_on").withStyle(ChatFormatting.GREEN)
+                                : Component.translatable("hud.splinecart.smoothing_off").withStyle(ChatFormatting.RED);
+                        var smoothText = Component.translatable("hud.splinecart.smoothing_status", smoothState);
+                        guiGraphics.centeredText(client.font, smoothText, w / 2, (h / 2) + 32, 0xFFCCCCCC);
+                    } else if (holdingBuildingItem) {
+                        Component smoothState = ties.isSmoothing()
+                                ? Component.translatable("hud.splinecart.smoothing_on").withStyle(ChatFormatting.GREEN)
+                                : Component.translatable("hud.splinecart.smoothing_off").withStyle(ChatFormatting.RED);
+                        var smoothText = Component.translatable("hud.splinecart.smoothing_status", smoothState);
+                        var hintText = Component.translatable("hud.splinecart.toggle_smoothing_hint",
+                                client.options.keyShift.getTranslatedKeyMessage(),
+                                client.options.keyUse.getTranslatedKeyMessage()).withStyle(ChatFormatting.GRAY);
+
+                        guiGraphics.centeredText(client.font, smoothText, w / 2, (h / 2) + 20, 0xFFFFFFFF);
+                        guiGraphics.centeredText(client.font, hintText, w / 2, (h / 2) + 32, 0xFFAAAAAA);
+                    }
+                } else if (origin != null && !world.getBlockState(pos).isAir()) {
+                    var text = Component.translatable(RIGHT_CLICK_HINT, client.options.keyUse.getTranslatedKeyMessage(), CANCEL);
+                    guiGraphics.centeredText(client.font, text, w / 2, (h / 2) + 20, 0xFFFFFFFF);
                 }
-
-                var hint = CANCEL;
-
-                if (!pos.equals(origin.pos()) && world.getBlockEntity(pos) instanceof TrackTiesBlockEntity ties && ties.prev() == null) {
-                    hint = CREATE;
-                }
-
-                int w = guiGraphics.guiWidth();
-                int h = guiGraphics.guiHeight();
-
-                var text = Component.translatable(RIGHT_CLICK_HINT, client.options.keyUse.getTranslatedKeyMessage(), hint);
-                guiGraphics.centeredText(client.font, text, w / 2, (h / 2) + 20, 0xFFFFFFFF);
             }
         }
     }

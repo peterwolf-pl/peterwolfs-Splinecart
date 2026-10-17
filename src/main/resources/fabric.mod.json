@@ -2,7 +2,7 @@
 	"schemaVersion": 1,
 	"id": "splinecart",
 	"version": "${version}",
-	"name": "Splinecart",
+	"name": "Splinecart 26.3",
 	"description": "Minecart tracks that curve",
 	"authors": [
 		"FoundationGames"
@@ -30,8 +30,8 @@
 		}
 	],
 	"depends": {
-		"fabricloader": ">=0.19.3",
-		"minecraft": "~26.1.2",
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
 		"java": ">=25",
 		"fabric-api": "*"
 	}

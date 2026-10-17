@@ -1,0 +1,22 @@
+{
+  "projectId": 1629730,
+  "title": "Splinecart 26.3",
+  "summary": "Minecart tracks that curve",
+  "description": "# Splinecart\n\nUse `/splinecart banking on` to make newly linked curved spline tracks bank into\ntheir turns. `/splinecart banking off` disables the build mode and\n`/splinecart banking toggle` switches it quickly.\n\nUse `/splinecart smoothing on|off|toggle` to control whether newly placed and connected\ntrack ties use smooth curve tangents or rigid block orientation. During building, you can\nalso Sneak + Right-Click in the air with a Track or Track Ties item to toggle your default smoothing mode,\nor Sneak + Right-Click any track tie to toggle smoothing on that specific tie. The HUD indicates\nthe targeted tie's smoothing status in real time.\n\n",
+  "enabled": false,
+  "releaseType": "release",
+  "changelogType": "markdown",
+  "changelog": "",
+  "manualRelease": false,
+  "media": {
+    "youtube": [],
+    "gallery": []
+  },
+  "dependencies": [
+    {
+      "slug": "fabric-api",
+      "type": "requiredDependency"
+    }
+  ],
+  "publishedVersion": null
+}

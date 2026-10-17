@@ -3,17 +3,12 @@ package io.github.foundationgames.splinecart.block.entity;
 import io.github.foundationgames.splinecart.TrackType;
 import io.github.foundationgames.splinecart.block.TrackTiesBlockEntity;
 import io.github.foundationgames.splinecart.util.Pose;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import com.mojang.blaze3d.systems.RenderSystem;
+import io.github.foundationgames.splinecart.util.TrackBanking;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import net.minecraft.client.renderer.LevelRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.resources.Identifier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3d;
@@ -21,21 +16,21 @@ import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
-import java.util.function.Function;
-
 public enum TrackRenderer {;
     public static int renderTrack(PoseStack.Pose trackTransform, PoseStack.Pose overlayTransform,
                                       @Nullable BufferProvider trackBuffer, @Nullable BufferProvider overlayBuffer,
                                       int overlay, int light, int segs, float overlayVOffset, Vector3fc overlayColor,
-                                      TrackTiesBlockEntity curr, TrackTiesBlockEntity prevE, TrackTiesBlockEntity nextE) {
+                                      TrackTiesBlockEntity curr, TrackTiesBlockEntity prevE,
+                                      @Nullable TrackTiesBlockEntity.RenderEndpoint next) {
         int status = 0;
         var start = curr.pose();
+        boolean banking = curr.nextBanking();
 
         @Nullable var buffer = trackBuffer != null ? trackBuffer.buffer() : null;
-        if (buffer != null) renderExtraTrackEnd(trackTransform, buffer, start, overlay, light, prevE, nextE);
+        if (buffer != null) renderExtraTrackEnd(trackTransform, buffer, start, overlay, light, prevE, next);
 
-        if (nextE != null) {
-            var end = nextE.pose();
+        if (next != null) {
+            var end = next.pose();
             var world = curr.getLevel();
 
             var trackType = curr.nextType();
@@ -53,7 +48,8 @@ public enum TrackRenderer {;
                     double t0 = (double)i / segs;
                     double t1 = (double)(i + 1) / segs;
 
-                    renderPart(world, trackTransform, buffer, start, end, u0, u1, 0, TrackTiesBlockEntityRenderer.WHITEF, t0, t1, totalDist, origin, basis, deriv, overlay);
+                    renderPart(world, trackTransform, buffer, start, end, banking, u0, u1, 0,
+                            TrackTiesBlockEntityRenderer.WHITEF, t0, t1, totalDist, origin, basis, deriv, overlay);
                 }
 
                 status |= trackBuffer.end() ? 0b01 : 0b00;
@@ -61,10 +57,10 @@ public enum TrackRenderer {;
 
             if (overlayBuffer != null) {
                 status |= renderTrackOverlay(overlayTransform, overlayBuffer,
-                        overlay, segs, start, end, world,
+                        overlay, segs, start, end, banking, world,
                         origin, basis, deriv,
                         overlayVOffset, overlayColor,
-                        trackType, curr, nextE)
+                        trackType)
                 ? 0b10 : 0b00;
             }
         } else if (trackBuffer != null) {
@@ -75,10 +71,10 @@ public enum TrackRenderer {;
     }
 
     public static boolean renderTrackOverlay(PoseStack.Pose transform, BufferProvider overlayBuffer,
-                                          int overlay, int segs, Pose start, Pose end, Level world,
+                                          int overlay, int segs, Pose start, Pose end, boolean banking, Level world,
                                           Vector3d origin, Matrix3d basis, Vector3d deriv,
                                           float vOffset, Vector3fc color,
-                                          TrackType trackType, TrackTiesBlockEntity curr, TrackTiesBlockEntity next) {
+                                          TrackType trackType) {
         if (trackType.overlay != null) {
             var olBuffer = overlayBuffer.buffer();
 
@@ -90,7 +86,8 @@ public enum TrackRenderer {;
                 double t0 = (double)i / segs;
                 double t1 = (double)(i + 1) / segs;
 
-                renderPart(world, transform, olBuffer, start, end, u0, u1, vOffset, color, t0, t1, totalDist, origin, basis, deriv, overlay);
+                renderPart(world, transform, olBuffer, start, end, banking, u0, u1, vOffset, color,
+                        t0, t1, totalDist, origin, basis, deriv, overlay);
             }
 
             return overlayBuffer.end();
@@ -101,14 +98,15 @@ public enum TrackRenderer {;
 
     private static void renderExtraTrackEnd(PoseStack.Pose transform, VertexConsumer buffer, Pose pose,
                                             int overlay, int light,
-                                            TrackTiesBlockEntity prevE, TrackTiesBlockEntity nextE) {
-        if ((prevE == null) ^ (nextE == null)) {
+                                            TrackTiesBlockEntity prevE,
+                                            @Nullable TrackTiesBlockEntity.RenderEndpoint next) {
+        if ((prevE == null) ^ (next == null)) {
             float z0 = -0.5f;
             float z1 = 0;
             float v0 = 1;
             float v1 = 0.5f;
 
-            if (nextE == null) {
+            if (next == null) {
                 z0 = 0;
                 z1 = 0.5f;
                 v0 = 0.5f;
@@ -144,15 +142,16 @@ public enum TrackRenderer {;
     }
 
     private static void renderPart(Level world, PoseStack.Pose entry, VertexConsumer buffer, Pose start, Pose end,
-                                   float u0, float u1, float vOffset, Vector3fc color, double t0, double t1, double[] blockProgress,
+                                   boolean banking, float u0, float u1, float vOffset, Vector3fc color,
+                                   double t0, double t1, double[] blockProgress,
                                    Vector3d origin0, Matrix3d basis0, Vector3d deriv0, int overlay) {
-        start.interpolate(end, t0, origin0, basis0, deriv0);
+        TrackBanking.interpolate(start, end, banking, t0, origin0, basis0, deriv0);
         var norm0 = new Vector3d(0, 1, 0).mul(basis0);
 
         var origin1 = new Vector3d(origin0);
         var basis1 = new Matrix3d(basis0);
         var deriv1 = new Vector3d(deriv0);
-        start.interpolate(end, t1, origin1, basis1, deriv1);
+        TrackBanking.interpolate(start, end, banking, t1, origin1, basis1, deriv1);
         var norm1 = new Vector3d(0, 1, 0).mul(basis1);
 
         float v0 = (float) blockProgress[0];
@@ -167,8 +166,8 @@ public enum TrackRenderer {;
         var pos0 = new BlockPos(Mth.floor(origin0.x()), Mth.floor(origin0.y()), Mth.floor(origin0.z()));
         var pos1 = new BlockPos(Mth.floor(origin1.x()), Mth.floor(origin1.y()), Mth.floor(origin1.z()));
 
-        int light0 = LevelRenderer.getLightCoords(world, pos0);
-        int light1 = LevelRenderer.getLightCoords(world, pos1);
+        int light0 = packedLight(world, pos0);
+        int light1 = packedLight(world, pos1);
 
         var point = new Vector3f();
 
@@ -193,24 +192,8 @@ public enum TrackRenderer {;
         boolean end();
     }
 
-    public static BufferProvider immediateBuf(MultiBufferSource source, Identifier texture, Function<Identifier, RenderType> renderType) {
-        return new ImmediateBufferProvider(source, texture, renderType);
-    }
-
     public static BufferProvider vboBuf(Object vbo, Object tessellator) {
         return null;
-    }
-
-    public record ImmediateBufferProvider(MultiBufferSource source, Identifier texture, Function<Identifier, RenderType> renderType) implements BufferProvider {
-        @Override
-        public VertexConsumer buffer() {
-            return source.getBuffer(renderType().apply(texture()));
-        }
-
-        @Override
-        public boolean end() {
-            return true;
-        }
     }
 
     public record DirectBufferProvider(VertexConsumer buffer) implements BufferProvider {
@@ -223,5 +206,9 @@ public enum TrackRenderer {;
         public boolean end() {
             return true;
         }
+    }
+
+    private static int packedLight(Level world, BlockPos pos) {
+        return (world.getBrightness(LightLayer.BLOCK, pos) << 4) | (world.getBrightness(LightLayer.SKY, pos) << 20);
     }
 }

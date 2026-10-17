@@ -1,0 +1,67 @@
+peterwolf's Splinecart — Survival Crafting Recipes
+
+All four player-obtainable items have shaped crafting recipes in Survival. The Track Follower is a hidden entity spawned by tracks and is not crafted.
+
+---
+
+Track Ties
+Description: Interact to rotate when placed.
+
+Unlocks when you pick up a Stick or any Wooden Slab.
+
+Crafting (makes 8):
+  [Wooden Slab]   [Wooden Slab]
+  [Wooden Slab] [Stick] [Wooden Slab]
+  [Wooden Slab]   [Wooden Slab]
+
+Any wooden slab works in every slot marked Wooden Slab.
+
+---
+
+Track
+Description: Links two Track Ties blocks together.
+
+Unlocks when you pick up a Rail or Iron Block.
+
+Crafting (makes 4):
+      [Iron Block]
+        [Rail]
+      [Iron Block]
+
+---
+
+Chain Drive Track
+Description: Track variant that pulls minecarts.
+
+Unlocks when you pick up an Activator Rail, Chain, or Iron Block.
+
+Crafting (makes 4):
+      [Iron Block]
+  [Chain] [Activator Rail] [Chain]
+      [Iron Block]
+
+---
+
+Magnetic Track
+Description: Track variant that accelerates or slows minecarts.
+
+Unlocks when you pick up a Powered Rail, Iron Block, or Copper Block.
+
+Crafting (makes 4):
+      [Iron Block]
+ [Copper Block] [Powered Rail] [Copper Block]
+      [Iron Block]
+
+The magnetic track's strength follows the redstone signal powering its Track Ties block.
+
+---
+
+Quick start
+
+1. Craft Track Ties and place them on any face of a block.
+2. Right-click a tie to rotate it. The dark arrows show the forward direction.
+3. Place a second tie facing the route you want.
+4. Craft a Track item, use it on the first tie, then on the second tie.
+5. Run a vanilla minecart into the first tie to start riding the spline.
+
+Recipe book tab: Redstone

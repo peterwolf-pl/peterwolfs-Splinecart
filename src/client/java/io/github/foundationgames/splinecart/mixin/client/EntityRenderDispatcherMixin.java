@@ -59,10 +59,10 @@ public class EntityRenderDispatcherMixin {
                 var passengerOffset = entity.position().subtract(trackFollower.position());
                 poseStack.translate(-renderOffset.x, -renderOffset.y, -renderOffset.z);
 
-                poseStack.mulPose(rotation);
+                poseStack.rotate(rotation);
 
                 poseStack.translate(passengerOffset.x, passengerOffset.y, passengerOffset.z);
-                poseStack.mulPose(SUtil.BACKWARDS);
+                poseStack.rotate(SUtil.BACKWARDS);
 
                 return;
             }

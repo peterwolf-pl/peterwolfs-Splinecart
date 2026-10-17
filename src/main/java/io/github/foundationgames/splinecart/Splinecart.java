@@ -5,9 +5,12 @@ import io.github.foundationgames.splinecart.block.TrackTiesBlockEntity;
 import io.github.foundationgames.splinecart.component.OriginComponent;
 import io.github.foundationgames.splinecart.entity.TrackFollowerEntity;
 import io.github.foundationgames.splinecart.item.TrackItem;
+import io.github.foundationgames.splinecart.item.TrackTiesItem;
 import io.github.foundationgames.splinecart.util.SUtil;
 import io.github.foundationgames.splinecart.util.TrackProgress;
+import io.github.foundationgames.splinecart.command.SplinecartCommands;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
@@ -20,7 +23,6 @@ import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityDataRegistry;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -39,10 +41,30 @@ import java.util.List;
 public class Splinecart implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger("splinecart");
 
+	public static final TrackTiesBlock WOOD_TRACK_TIES = SUtil.register(BuiltInRegistries.BLOCK, id("wood_track_ties"),
+			(i, k) -> new TrackTiesBlock(SupportMode.WOOD, BlockBehaviour.Properties.ofLegacyCopy(Blocks.RAIL).setId(k)));
+	public static final TrackTiesBlock STEEL_TRACK_TIES = SUtil.register(BuiltInRegistries.BLOCK, id("steel_track_ties"),
+			(i, k) -> new TrackTiesBlock(SupportMode.STEEL, BlockBehaviour.Properties.ofLegacyCopy(Blocks.RAIL).setId(k)));
 	public static final TrackTiesBlock TRACK_TIES = SUtil.register(BuiltInRegistries.BLOCK, id("track_ties"),
-			(i, k) -> new TrackTiesBlock(BlockBehaviour.Properties.ofLegacyCopy(Blocks.RAIL).setId(k)));
+			(i, k) -> new TrackTiesBlock(SupportMode.WOOD, BlockBehaviour.Properties.ofLegacyCopy(Blocks.RAIL).setId(k)));
 	public static final BlockEntityType<TrackTiesBlockEntity> TRACK_TIES_BE = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, id("track_ties"),
-			FabricBlockEntityTypeBuilder.create(TrackTiesBlockEntity::new, TRACK_TIES).build());
+			FabricBlockEntityTypeBuilder.create(TrackTiesBlockEntity::new, WOOD_TRACK_TIES, STEEL_TRACK_TIES, TRACK_TIES).build());
+
+	public static final TrackTiesItem WOOD_TRACK_TIES_ITEM = SUtil.register(BuiltInRegistries.ITEM, id("wood_track_ties"),
+			(i, k) -> new TrackTiesItem(WOOD_TRACK_TIES, new Item.Properties()
+					.component(DataComponents.LORE,
+							lore(Component.translatable("item.splinecart.wood_track_ties.desc").withStyle(ChatFormatting.GRAY))
+					).useBlockDescriptionPrefix().setId(k)));
+	public static final TrackTiesItem STEEL_TRACK_TIES_ITEM = SUtil.register(BuiltInRegistries.ITEM, id("steel_track_ties"),
+			(i, k) -> new TrackTiesItem(STEEL_TRACK_TIES, new Item.Properties()
+					.component(DataComponents.LORE,
+							lore(Component.translatable("item.splinecart.steel_track_ties.desc").withStyle(ChatFormatting.GRAY))
+					).useBlockDescriptionPrefix().setId(k)));
+	public static final TrackTiesItem TRACK_TIES_ITEM = SUtil.register(BuiltInRegistries.ITEM, id("track_ties"),
+			(i, k) -> new TrackTiesItem(TRACK_TIES, new Item.Properties()
+					.component(DataComponents.LORE,
+							lore(Component.translatable("item.splinecart.track_ties.desc").withStyle(ChatFormatting.GRAY))
+					).useBlockDescriptionPrefix().setId(k)));
 
 	public static final TrackItem TRACK = SUtil.register(BuiltInRegistries.ITEM, id("track"),
 			(i, k) -> new TrackItem(TrackType.DEFAULT, new Item.Properties().component(DataComponents.LORE,
@@ -68,7 +90,8 @@ public class Splinecart implements ModInitializer {
 	public static final CreativeModeTab SPLINECART_GROUP = FabricCreativeModeTab.builder()
 			.title(Component.translatable("itemGroup.splinecart"))
 			.displayItems((params, output) -> {
-				output.accept(TRACK_TIES.asItem().getDefaultInstance());
+				output.accept(WOOD_TRACK_TIES_ITEM.getDefaultInstance());
+				output.accept(STEEL_TRACK_TIES_ITEM.getDefaultInstance());
 				output.accept(TRACK.getDefaultInstance());
 				output.accept(CHAIN_DRIVE_TRACK.getDefaultInstance());
 				output.accept(MAGNETIC_TRACK.getDefaultInstance());
@@ -78,14 +101,9 @@ public class Splinecart implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		var tieItem = SUtil.register(BuiltInRegistries.ITEM, id("track_ties"),
-				(i, k) -> new BlockItem(TRACK_TIES, new Item.Properties()
-						.component(DataComponents.LORE,
-								lore(Component.translatable("item.splinecart.track_ties.desc").withStyle(ChatFormatting.GRAY))
-						).useBlockDescriptionPrefix().setId(k)));
-
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.REDSTONE_BLOCKS).register(output -> {
-			output.accept(tieItem.getDefaultInstance());
+			output.accept(WOOD_TRACK_TIES_ITEM.getDefaultInstance());
+			output.accept(STEEL_TRACK_TIES_ITEM.getDefaultInstance());
 			output.accept(TRACK.getDefaultInstance());
 			output.accept(CHAIN_DRIVE_TRACK.getDefaultInstance());
 			output.accept(MAGNETIC_TRACK.getDefaultInstance());
@@ -94,6 +112,9 @@ public class Splinecart implements ModInitializer {
 		FabricEntityDataRegistry.register(id("track_progress"), TrackProgress.DATA_HANDLER);
 
 		Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, id("splinecart"), SPLINECART_GROUP);
+
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
+				SplinecartCommands.register(dispatcher));
 	}
 
 	public static ItemLore lore(Component lore) {
