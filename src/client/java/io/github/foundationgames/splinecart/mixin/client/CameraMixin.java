@@ -1,6 +1,7 @@
 package io.github.foundationgames.splinecart.mixin.client;
 
 import io.github.foundationgames.splinecart.SplinecartClient;
+import io.github.foundationgames.splinecart.client.SplineCameraHandoff;
 import io.github.foundationgames.splinecart.entity.TrackFollowerEntity;
 import io.github.foundationgames.splinecart.util.SUtil;
 import net.minecraft.client.Minecraft;
@@ -24,14 +25,20 @@ public abstract class CameraMixin {
     @Shadow private Entity entity;
     @Shadow private net.minecraft.world.level.Level level;
 
-    @Inject(method = "alignWithEntity(F)V", at = @At("TAIL"))
-    private void splinecart$updateCamPosWhileRiding(float tickDelta, CallbackInfo info) {
+    @Inject(method = "setup", at = @At("HEAD"))
+    private void splinecart$bakeCameraWhenLeavingTrack(net.minecraft.world.level.Level level, Entity cameraEntity, boolean detached, boolean thirdPersonReverse, float tickDelta, CallbackInfo info) {
+        SplineCameraHandoff.applyIfLeaving(cameraEntity);
+    }
+
+    @Inject(method = "setup", at = @At("TAIL"))
+    private void splinecart$updateCamPosWhileRiding(net.minecraft.world.level.Level level, Entity cameraEntity, boolean detached, boolean thirdPersonReverse, float tickDelta, CallbackInfo info) {
         var self = this.entity;
         if (self != null) {
             var vehicle = self.getVehicle();
             if (vehicle != null) {
                 var tf = vehicle.getVehicle();
                 if (tf instanceof TrackFollowerEntity trackFollower) {
+                    SplineCameraHandoff.capture(trackFollower, vehicle.getViewYRot(tickDelta), tickDelta);
                     var world = this.level;
                     var diff = self.position().add(0, self.getEyeHeight(), 0).subtract(trackFollower.position());
                     var camPos = new Vector3d(diff.x, diff.y, diff.z);

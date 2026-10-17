@@ -1,0 +1,97 @@
+package io.github.foundationgames.splinecart;
+
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import io.github.foundationgames.splinecart.block.TrackGeometry;
+import io.github.foundationgames.splinecart.block.entity.ClientTrackGeometry;
+import io.github.foundationgames.splinecart.block.entity.TrackTiesBlockEntityRenderer;
+import io.github.foundationgames.splinecart.config.Config;
+import io.github.foundationgames.splinecart.config.ConfigOption;
+import io.github.foundationgames.splinecart.util.SUtil;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gl.Defines;
+import net.minecraft.client.gl.ShaderProgramKey;
+import net.minecraft.client.gl.ShaderProgramKeys;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderStateShard;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.renderer.entity.NoopEntityRenderer;
+import net.minecraft.resources.ResourceLocation;
+import net.fabricmc.fabric.api.util.TriState;
+
+import java.io.IOException;
+
+public class SplinecartClient implements ClientModInitializer {
+	public static final Config CONFIG = new Config("splinecart_client",
+			() -> FabricLoader.getInstance().getConfigDir()
+					.resolve("splinecart").resolve("splinecart_client.properties"));
+
+	public static final ConfigOption.BooleanOption CFG_ROTATE_CAMERA = CONFIG.optBool("rotate_camera", true);
+	public static final ConfigOption.BooleanOption CFG_VBOS = CONFIG.optBool("vbos", false);
+	public static final ConfigOption.IntOption CFG_TRACK_RESOLUTION = CONFIG.optInt("track_resolution", 3, 1, 16);
+	public static final ConfigOption.IntOption CFG_TRACK_RENDER_DISTANCE = CONFIG.optInt("track_render_distance", 8, 4, 32);
+
+	public static final ShaderProgramKey ENTITY_CUTOUT_NO_CULL_UV_TRANSFORMED = registerShader(
+			Splinecart.id("core/rendertype_entity_cutout_no_cull_uv_transform"),
+			DefaultVertexFormat.NEW_ENTITY,
+			Defines.EMPTY);
+
+	@Override
+	public void onInitializeClient() {
+		SUtil.TICK_DELTA = () -> Minecraft.getInstance().getTimer().getGameTimeDeltaTicks();
+
+		try {
+			CONFIG.load();
+		} catch (IOException e) {
+			Splinecart.LOGGER.error("Error loading client config on mod init", e);
+		}
+
+		BlockRenderLayerMap.INSTANCE.putBlock(Splinecart.TRACK_TIES, RenderType.cutout());
+
+		BlockEntityRenderers.register(Splinecart.TRACK_TIES_BE, TrackTiesBlockEntityRenderer::new);
+		EntityRendererRegistry.register(Splinecart.TRACK_FOLLOWER, NoopEntityRenderer::new);
+
+		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
+				dispatcher.register(
+					LiteralArgumentBuilder.<FabricClientCommandSource>literal("splinecartc")
+							.then(CONFIG.command(LiteralArgumentBuilder.literal("config"),
+									FabricClientCommandSource::sendFeedback))
+		));
+
+		HudRenderCallback.EVENT.register(new SplinecartHud());
+		TrackGeometry.CONSTRUCTOR = ClientTrackGeometry::new;
+	}
+
+	public static ShaderProgramKey registerShader(ResourceLocation id, VertexFormat format, Defines defines) {
+		var key = new ShaderProgramKey(id, format, defines);
+		ShaderProgramKeys.getAll().add(key);
+		return key;
+	}
+
+	public static RenderType renderLayerEntityCutoutNoCullUvTransform(ResourceLocation texture, float x, float y) {
+		return RenderType.create(
+				"splinecart_entity_cutout_no_cull_uv_transform",
+				DefaultVertexFormat.NEW_ENTITY,
+				VertexFormat.Mode.QUADS,
+				1536,
+				true, false,
+				RenderType.CompositeState.builder()
+						.setShaderState(new RenderStateShard.ShaderStateShard(ENTITY_CUTOUT_NO_CULL_UV_TRANSFORMED))
+						.setTextureState(new RenderStateShard.TextureStateShard(texture, TriState.FALSE, false))
+						.setTexturingState(new RenderStateShard.OffsetTexturingStateShard(x, y))
+						.setTransparencyState(RenderStateShard.NO_TRANSPARENCY)
+						.setCullState(RenderStateShard.NO_CULL)
+						.setLightmapState(RenderStateShard.LIGHTMAP)
+						.setOverlayState(RenderStateShard.OVERLAY)
+						.createCompositeState(false)
+		);
+	}
+}

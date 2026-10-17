@@ -1,0 +1,420 @@
+{
+    "variants": {
+        "pointing=0,facing=down,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 180
+        },
+        "pointing=0,facing=down,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 180
+        },
+        "pointing=0,facing=down,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 180
+        },
+        "pointing=0,facing=down,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 180
+        },
+        "pointing=0,facing=east,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 90,
+            "y": 90
+        },
+        "pointing=0,facing=east,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 90,
+            "y": 90
+        },
+        "pointing=0,facing=east,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 90,
+            "y": 90
+        },
+        "pointing=0,facing=east,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 90,
+            "y": 90
+        },
+        "pointing=0,facing=north,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 90
+        },
+        "pointing=0,facing=north,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 90
+        },
+        "pointing=0,facing=north,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 90
+        },
+        "pointing=0,facing=north,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 90
+        },
+        "pointing=0,facing=south,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 90,
+            "y": 180
+        },
+        "pointing=0,facing=south,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 90,
+            "y": 180
+        },
+        "pointing=0,facing=south,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 90,
+            "y": 180
+        },
+        "pointing=0,facing=south,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 90,
+            "y": 180
+        },
+        "pointing=0,facing=up,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_0"
+        },
+        "pointing=0,facing=up,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_0"
+        },
+        "pointing=0,facing=up,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_0"
+        },
+        "pointing=0,facing=up,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_0"
+        },
+        "pointing=0,facing=west,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 90,
+            "y": 270
+        },
+        "pointing=0,facing=west,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 90,
+            "y": 270
+        },
+        "pointing=0,facing=west,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 90,
+            "y": 270
+        },
+        "pointing=0,facing=west,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_0",
+            "x": 90,
+            "y": 270
+        },
+        "pointing=1,facing=down,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 180
+        },
+        "pointing=1,facing=down,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 180
+        },
+        "pointing=1,facing=down,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 180
+        },
+        "pointing=1,facing=down,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 180
+        },
+        "pointing=1,facing=east,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 90,
+            "y": 90
+        },
+        "pointing=1,facing=east,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 90,
+            "y": 90
+        },
+        "pointing=1,facing=east,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 90,
+            "y": 90
+        },
+        "pointing=1,facing=east,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 90,
+            "y": 90
+        },
+        "pointing=1,facing=north,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 90
+        },
+        "pointing=1,facing=north,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 90
+        },
+        "pointing=1,facing=north,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 90
+        },
+        "pointing=1,facing=north,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 90
+        },
+        "pointing=1,facing=south,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 90,
+            "y": 180
+        },
+        "pointing=1,facing=south,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 90,
+            "y": 180
+        },
+        "pointing=1,facing=south,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 90,
+            "y": 180
+        },
+        "pointing=1,facing=south,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 90,
+            "y": 180
+        },
+        "pointing=1,facing=up,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_1"
+        },
+        "pointing=1,facing=up,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_1"
+        },
+        "pointing=1,facing=up,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_1"
+        },
+        "pointing=1,facing=up,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_1"
+        },
+        "pointing=1,facing=west,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 90,
+            "y": 270
+        },
+        "pointing=1,facing=west,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 90,
+            "y": 270
+        },
+        "pointing=1,facing=west,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 90,
+            "y": 270
+        },
+        "pointing=1,facing=west,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_1",
+            "x": 90,
+            "y": 270
+        },
+        "pointing=2,facing=down,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 180
+        },
+        "pointing=2,facing=down,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 180
+        },
+        "pointing=2,facing=down,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 180
+        },
+        "pointing=2,facing=down,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 180
+        },
+        "pointing=2,facing=east,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 90,
+            "y": 90
+        },
+        "pointing=2,facing=east,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 90,
+            "y": 90
+        },
+        "pointing=2,facing=east,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 90,
+            "y": 90
+        },
+        "pointing=2,facing=east,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 90,
+            "y": 90
+        },
+        "pointing=2,facing=north,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 90
+        },
+        "pointing=2,facing=north,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 90
+        },
+        "pointing=2,facing=north,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 90
+        },
+        "pointing=2,facing=north,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 90
+        },
+        "pointing=2,facing=south,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 90,
+            "y": 180
+        },
+        "pointing=2,facing=south,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 90,
+            "y": 180
+        },
+        "pointing=2,facing=south,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 90,
+            "y": 180
+        },
+        "pointing=2,facing=south,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 90,
+            "y": 180
+        },
+        "pointing=2,facing=up,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_2"
+        },
+        "pointing=2,facing=up,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_2"
+        },
+        "pointing=2,facing=up,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_2"
+        },
+        "pointing=2,facing=up,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_2"
+        },
+        "pointing=2,facing=west,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 90,
+            "y": 270
+        },
+        "pointing=2,facing=west,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 90,
+            "y": 270
+        },
+        "pointing=2,facing=west,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 90,
+            "y": 270
+        },
+        "pointing=2,facing=west,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_2",
+            "x": 90,
+            "y": 270
+        },
+        "pointing=3,facing=down,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 180
+        },
+        "pointing=3,facing=down,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 180
+        },
+        "pointing=3,facing=down,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 180
+        },
+        "pointing=3,facing=down,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 180
+        },
+        "pointing=3,facing=east,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 90,
+            "y": 90
+        },
+        "pointing=3,facing=east,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 90,
+            "y": 90
+        },
+        "pointing=3,facing=east,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 90,
+            "y": 90
+        },
+        "pointing=3,facing=east,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 90,
+            "y": 90
+        },
+        "pointing=3,facing=north,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 90
+        },
+        "pointing=3,facing=north,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 90
+        },
+        "pointing=3,facing=north,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 90
+        },
+        "pointing=3,facing=north,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 90
+        },
+        "pointing=3,facing=south,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 90,
+            "y": 180
+        },
+        "pointing=3,facing=south,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 90,
+            "y": 180
+        },
+        "pointing=3,facing=south,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 90,
+            "y": 180
+        },
+        "pointing=3,facing=south,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 90,
+            "y": 180
+        },
+        "pointing=3,facing=up,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_3"
+        },
+        "pointing=3,facing=up,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_3"
+        },
+        "pointing=3,facing=up,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_3"
+        },
+        "pointing=3,facing=up,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_3"
+        },
+        "pointing=3,facing=west,powered=false,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 90,
+            "y": 270
+        },
+        "pointing=3,facing=west,powered=false,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 90,
+            "y": 270
+        },
+        "pointing=3,facing=west,powered=true,switch=false": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 90,
+            "y": 270
+        },
+        "pointing=3,facing=west,powered=true,switch=true": {
+            "model": "splinecart:block/steel_track_ties_pointing_3",
+            "x": 90,
+            "y": 270
+        }
+    }
+}

@@ -1,0 +1,54 @@
+{
+	"parent": "minecraft:recipes/root",
+	"criteria": {
+		"has_activator_rail": {
+			"conditions": {
+				"items": [
+					{
+						"items": "minecraft:activator_rail"
+					}
+				]
+			},
+			"trigger": "minecraft:inventory_changed"
+		},
+		"has_chain": {
+			"conditions": {
+				"items": [
+					{
+						"items": "minecraft:iron_chain"
+					}
+				]
+			},
+			"trigger": "minecraft:inventory_changed"
+		},
+		"has_iron_block": {
+			"conditions": {
+				"items": [
+					{
+						"items": "minecraft:iron_block"
+					}
+				]
+			},
+			"trigger": "minecraft:inventory_changed"
+		},
+		"has_the_recipe": {
+			"conditions": {
+				"recipe": "splinecart:chain_drive_track"
+			},
+			"trigger": "minecraft:recipe_unlocked"
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_activator_rail",
+			"has_chain",
+			"has_iron_block"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"splinecart:chain_drive_track"
+		]
+	}
+}
