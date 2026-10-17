@@ -1,5 +1,7 @@
 {
   "values": [
-    "splinecart:track_ties"
+    "splinecart:track_ties",
+    "splinecart:wood_track_ties",
+    "splinecart:steel_track_ties"
   ]
 }

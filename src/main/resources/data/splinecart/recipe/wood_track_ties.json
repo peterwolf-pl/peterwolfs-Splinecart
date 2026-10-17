@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "category": "redstone",
+    "key": {
+        "A": "minecraft:stick",
+        "B": "#minecraft:wooden_slabs"
+    },
+    "pattern": [
+        "B B",
+        "BAB",
+        "B B"
+    ],
+    "result": {
+        "count": 8,
+        "id": "splinecart:wood_track_ties"
+    }
+}
