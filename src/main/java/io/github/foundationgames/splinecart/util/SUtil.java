@@ -43,3 +43,4 @@ public enum SUtil {;
         return Double.isNaN(rot.x()) || Double.isNaN(rot.y()) || Double.isNaN(rot.z()) || Double.isNaN(rot.w());
     }
 }
+
