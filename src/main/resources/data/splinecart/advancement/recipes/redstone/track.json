@@ -1,0 +1,43 @@
+{
+	"parent": "minecraft:recipes/root",
+	"criteria": {
+		"has_iron_block": {
+			"conditions": {
+				"items": [
+					{
+						"items": "minecraft:iron_block"
+					}
+				]
+			},
+			"trigger": "minecraft:inventory_changed"
+		},
+		"has_rail": {
+			"conditions": {
+				"items": [
+					{
+						"items": "minecraft:rail"
+					}
+				]
+			},
+			"trigger": "minecraft:inventory_changed"
+		},
+		"has_the_recipe": {
+			"conditions": {
+				"recipe": "splinecart:track"
+			},
+			"trigger": "minecraft:recipe_unlocked"
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_iron_block",
+			"has_rail"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"splinecart:track"
+		]
+	}
+}

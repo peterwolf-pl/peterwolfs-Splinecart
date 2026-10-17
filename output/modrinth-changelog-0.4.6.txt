@@ -1,0 +1,9 @@
+peterwolf's Splinecart 0.4.6+26.2
+
+Survival recipe book fix
+
+- Fixed all four craftable items not appearing in the Survival recipe book even though their shaped recipes were present in the mod jar.
+- Added recipe unlock advancements for Track Ties, Track, Chain Drive Track, and Magnetic Track.
+- Recipes now unlock automatically when you pick up their ingredients and show under the Redstone tab in the recipe book.
+
+Target: Minecraft 26.2, Fabric Loader 0.19.3, Fabric API 0.153.0+26.2, Java 25.

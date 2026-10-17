@@ -1,0 +1,63 @@
+Failed to load: net.minecraft.client.gl.ShaderProgramKey
+java.lang.ClassNotFoundException: net.minecraft.client.gl.ShaderProgramKey
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:580)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:490)
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:467)
+	at java.base/java.lang.Class.forName(Class.java:458)
+	at io.github.foundationgames.splinecart.Inspect.main(Inspect.java:21)
+
+Failed to load: net.minecraft.client.renderer.ShaderProgramKey
+java.lang.ClassNotFoundException: net.minecraft.client.renderer.ShaderProgramKey
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:580)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:490)
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:467)
+	at java.base/java.lang.Class.forName(Class.java:458)
+	at io.github.foundationgames.splinecart.Inspect.main(Inspect.java:21)
+
+Failed to load: net.minecraft.client.gl.ShaderProgramKeys
+java.lang.ClassNotFoundException: net.minecraft.client.gl.ShaderProgramKeys
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:580)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:490)
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:467)
+	at java.base/java.lang.Class.forName(Class.java:458)
+	at io.github.foundationgames.splinecart.Inspect.main(Inspect.java:21)
+
+Failed to load: net.minecraft.client.renderer.ShaderProgramKeys
+java.lang.ClassNotFoundException: net.minecraft.client.renderer.ShaderProgramKeys
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:580)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:490)
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:467)
+	at java.base/java.lang.Class.forName(Class.java:458)
+	at io.github.foundationgames.splinecart.Inspect.main(Inspect.java:21)
+
+Failed to load: net.minecraft.client.renderer.ShaderInstance
+java.lang.ClassNotFoundException: net.minecraft.client.renderer.ShaderInstance
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:580)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:490)
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:467)
+	at java.base/java.lang.Class.forName(Class.java:458)
+	at io.github.foundationgames.splinecart.Inspect.main(Inspect.java:21)
+
+Failed to load: net.minecraft.client.renderer.RenderType
+java.lang.ClassNotFoundException: net.minecraft.client.renderer.RenderType
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:580)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:490)
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:467)
+	at java.base/java.lang.Class.forName(Class.java:458)
+	at io.github.foundationgames.splinecart.Inspect.main(Inspect.java:21)
+
+Failed to load: net.minecraft.client.renderer.RenderStateShard
+java.lang.ClassNotFoundException: net.minecraft.client.renderer.RenderStateShard
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:580)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:490)
+	at java.base/java.lang.Class.forName0(Native Method)
+	at java.base/java.lang.Class.forName(Class.java:467)
+	at java.base/java.lang.Class.forName(Class.java:458)
+	at io.github.foundationgames.splinecart.Inspect.main(Inspect.java:21)
+

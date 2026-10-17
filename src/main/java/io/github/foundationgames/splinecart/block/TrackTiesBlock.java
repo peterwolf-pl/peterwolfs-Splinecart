@@ -1,6 +1,7 @@
 package io.github.foundationgames.splinecart.block;
 
 import com.mojang.serialization.MapCodec;
+import io.github.foundationgames.splinecart.Splinecart;
 import io.github.foundationgames.splinecart.item.TrackItem;
 import io.github.foundationgames.splinecart.util.Pose;
 import io.github.foundationgames.splinecart.util.SplineSegment;
@@ -10,7 +11,11 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -23,6 +28,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MinecartItem;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionHand;
@@ -33,11 +40,17 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.redstone.Orientation;
+import io.github.foundationgames.splinecart.SmoothingPreferences;
+import io.github.foundationgames.splinecart.SupportMode;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4d;
 import org.joml.Matrix3d;
@@ -48,51 +61,89 @@ import java.util.ArrayList;
 public class TrackTiesBlock extends DirectionalBlock implements EntityBlock {
     public static final MapCodec<TrackTiesBlock> CODEC = simpleCodec(TrackTiesBlock::new);
     public static final IntegerProperty POINTING = IntegerProperty.create("pointing", 0, 3);
+    public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
+    public static final BooleanProperty SWITCH = BooleanProperty.create("switch");
 
     public static final VoxelShape[] SHAPES = new VoxelShape[Direction.values().length];
 
-    public TrackTiesBlock(Properties settings) {
+    private final SupportMode supportMode;
+
+    public TrackTiesBlock(SupportMode supportMode, Properties settings) {
         super(settings);
-        registerDefaultState(defaultBlockState().setValue(FACING, Direction.UP).setValue(POINTING, 0));
+        this.supportMode = supportMode;
+        registerDefaultState(defaultBlockState().setValue(FACING, Direction.UP).setValue(POINTING, 0).setValue(POWERED, false).setValue(SWITCH, false));
+    }
+
+    public TrackTiesBlock(Properties settings) {
+        this(SupportMode.WOOD, settings);
+    }
+
+    public SupportMode getSupportMode() {
+        return supportMode;
+    }
+
+    @Override
+    protected MapCodec<? extends DirectionalBlock> codec() {
+        return CODEC;
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(FACING, POINTING);
+        builder.add(FACING, POINTING, POWERED, SWITCH);
     }
 
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        var side = ctx.getClickedFace();
+        var player = ctx.getPlayer();
         var hdir = ctx.getHorizontalDirection();
-        int rot;
-
-        switch (side) {
-            case DOWN -> rot = Math.floorMod(2 + hdir.get2DDataValue(), 4);
-            case UP -> rot = Math.floorMod(2 - hdir.get2DDataValue(), 4);
-            default -> {
-                int hos = Math.floorMod(2 + hdir.getOpposite().get2DDataValue() - side.get2DDataValue(), 4) - 2;
-                if (hos == 0) {
-                    var player = ctx.getPlayer();
-                    float pitch = 0;
-                    if (player != null) {
-                        pitch = player.getXRot();
-                    }
-                    rot = pitch <= 0 ? 2 : 0;
-                } else {
-                    rot = hos > 0 ? 1 : 3;
-                }
-            }
+        if (player != null) {
+            return stateForLook(hdir, player.getXRot());
         }
 
-        return defaultBlockState().setValue(FACING, ctx.getClickedFace()).setValue(POINTING, rot);
+        var side = ctx.getClickedFace();
+        int rot = switch (side) {
+            case DOWN -> Math.floorMod(2 + hdir.get2DDataValue(), 4);
+            case UP -> Math.floorMod(2 - hdir.get2DDataValue(), 4);
+            default -> {
+                int hos = Math.floorMod(2 + hdir.getOpposite().get2DDataValue() - side.get2DDataValue(), 4) - 2;
+                yield hos == 0 ? 2 : (hos > 0 ? 1 : 3);
+            }
+        };
+        return defaultBlockState().setValue(FACING, side).setValue(POINTING, rot);
+    }
+
+    private BlockState stateForLook(Direction hdir, float pitch) {
+        if (pitch > 45.0f) {
+            return defaultBlockState()
+                    .setValue(FACING, Direction.UP)
+                    .setValue(POINTING, Math.floorMod(2 - hdir.get2DDataValue(), 4));
+        }
+        if (pitch < -45.0f) {
+            return defaultBlockState()
+                    .setValue(FACING, Direction.DOWN)
+                    .setValue(POINTING, Math.floorMod(2 + hdir.get2DDataValue(), 4));
+        }
+        return defaultBlockState()
+                .setValue(FACING, hdir.getOpposite())
+                .setValue(POINTING, pitch <= 0.0f ? 2 : 0);
     }
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return SHAPES[state.getValue(FACING).ordinal()];
+    }
+
+    @Override
+    protected VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+        if (context instanceof EntityCollisionContext entityContext) {
+            Entity entity = entityContext.getEntity();
+            if (entity instanceof AbstractMinecart || entity instanceof TrackFollowerEntity) {
+                return Shapes.empty();
+            }
+        }
+        return super.getCollisionShape(state, world, pos, context);
     }
 
 
@@ -103,6 +154,62 @@ public class TrackTiesBlock extends DirectionalBlock implements EntityBlock {
 
         if (world.getBlockEntity(pos) instanceof TrackTiesBlockEntity tie) {
             tie.updatePower();
+            boolean isSwitch = tie.isSwitch();
+            if (state.getValue(SWITCH) != isSwitch) {
+                world.setBlock(pos, state.setValue(SWITCH, isSwitch), 3);
+            }
+        }
+    }
+
+    @Override
+    protected boolean isSignalSource(BlockState state) {
+        return !state.getValue(SWITCH);
+    }
+
+    @Override
+    protected int getSignal(BlockState state, BlockGetter world, BlockPos pos, Direction direction) {
+        if (state.getValue(SWITCH)) {
+            return 0;
+        }
+        return state.getValue(POWERED) ? 15 : 0;
+    }
+
+    @Override
+    protected int getDirectSignal(BlockState state, BlockGetter world, BlockPos pos, Direction direction) {
+        if (state.getValue(SWITCH)) {
+            return 0;
+        }
+        return state.getValue(POWERED) ? 15 : 0;
+    }
+
+    @Override
+    protected boolean hasAnalogOutputSignal(BlockState state) {
+        return !state.getValue(SWITCH);
+    }
+
+    @Override
+    protected int getAnalogOutputSignal(BlockState state, Level world, BlockPos pos, Direction direction) {
+        if (state.getValue(SWITCH)) {
+            return 0;
+        }
+        return state.getValue(POWERED) ? 15 : 0;
+    }
+
+    @Override
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {
+        if (world.isClientSide() || type != Splinecart.TRACK_TIES_BE) {
+            return null;
+        }
+        return (BlockEntityTicker<T>) (BlockEntityTicker<TrackTiesBlockEntity>) (level, blockPos, blockState, ties) -> ties.tickDetector();
+    }
+
+    @Override
+    public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
+        super.setPlacedBy(world, pos, state, placer, itemStack);
+        if (placer instanceof Player player && world.getBlockEntity(pos) instanceof TrackTiesBlockEntity tie) {
+            tie.setSmoothing(SmoothingPreferences.get(player));
         }
     }
 
@@ -111,7 +218,17 @@ public class TrackTiesBlock extends DirectionalBlock implements EntityBlock {
         if (player.mayBuild() &&
                 !(player.getItemInHand(InteractionHand.MAIN_HAND).getItem() instanceof TrackItem) &&
                 world.getBlockEntity(pos) instanceof TrackTiesBlockEntity tie) {
-            if (tie.prev() == null && tie.next() == null) {
+            if (player.isShiftKeyDown()) {
+                if (world.isClientSide()) {
+                    return InteractionResult.SUCCESS;
+                }
+                boolean newSmoothing = !tie.isSmoothing();
+                tie.setSmoothing(newSmoothing);
+                player.sendOverlayMessage(Component.translatable(newSmoothing ? "msg.splinecart.tie_smoothing_enabled" : "msg.splinecart.tie_smoothing_disabled"));
+                world.playSound(null, pos, SoundEvents.DISPENSER_DISPENSE, SoundSource.BLOCKS, 0.8f, newSmoothing ? 1.5f : 0.8f);
+                return InteractionResult.CONSUME;
+            }
+            if (tie.prev() == null && tie.next() == null && tie.prevAlt() == null && tie.nextAlt() == null) {
                 if (world.isClientSide()) {
                     return InteractionResult.SUCCESS;
                 } else {
@@ -123,6 +240,15 @@ public class TrackTiesBlock extends DirectionalBlock implements EntityBlock {
 
                     return InteractionResult.CONSUME;
                 }
+            } else {
+                if (world.isClientSide()) {
+                    return InteractionResult.SUCCESS;
+                }
+                boolean newSmoothing = !tie.isSmoothing();
+                tie.setSmoothing(newSmoothing);
+                player.sendOverlayMessage(Component.translatable(newSmoothing ? "msg.splinecart.tie_smoothing_enabled" : "msg.splinecart.tie_smoothing_disabled"));
+                world.playSound(null, pos, SoundEvents.DISPENSER_DISPENSE, SoundSource.BLOCKS, 0.8f, newSmoothing ? 1.5f : 0.8f);
+                return InteractionResult.CONSUME;
             }
         }
 
@@ -171,7 +297,9 @@ public class TrackTiesBlock extends DirectionalBlock implements EntityBlock {
             return InteractionResult.FAIL;
         }
 
-        var follower = TrackFollowerEntity.createPlaced(world, segment.start().getBlockPos(), progress);
+        var follower = (segment.start() != null && segment.end() != null)
+                ? TrackFollowerEntity.createPlaced(world, segment.start().getBlockPos(), segment.end().getBlockPos(), progress)
+                : (segment.start() != null ? TrackFollowerEntity.createPlaced(world, segment.start().getBlockPos(), progress) : null);
         if (follower == null || !(world instanceof ServerLevel serverLevel)) {
             return InteractionResult.FAIL;
         }
@@ -188,11 +316,18 @@ public class TrackTiesBlock extends DirectionalBlock implements EntityBlock {
     }
 
     private static @Nullable SplineSegment nearestStraightSegment(TrackTiesBlockEntity tie, BlockHitResult hit) {
-        var candidates = new ArrayList<SplineSegment>(2);
+        var candidates = new ArrayList<SplineSegment>(4);
         var next = tie.next();
         if (next != null) candidates.add(new SplineSegment(tie, next));
+        var nextAlt = tie.nextAlt();
+        if (nextAlt != null) candidates.add(new SplineSegment(tie, nextAlt, tie.nextAltBanking()));
         var prev = tie.prev();
         if (prev != null) candidates.add(new SplineSegment(prev, tie));
+        var prevAlt = tie.prevAlt();
+        if (prevAlt != null) {
+            boolean banking = tie.getBlockPos().equals(prevAlt.nextAltPos()) ? prevAlt.nextAltBanking() : prevAlt.nextBanking();
+            candidates.add(new SplineSegment(prevAlt, tie, banking));
+        }
 
         var point = new Vector3d(hit.getLocation().x(), hit.getLocation().y(), hit.getLocation().z());
         SplineSegment nearest = null;
@@ -212,13 +347,18 @@ public class TrackTiesBlock extends DirectionalBlock implements EntityBlock {
     }
 
     private static @Nullable EntityType<? extends AbstractMinecart> minecartType(Item item) {
-        if (item == Items.MINECART) return EntityType.MINECART;
-        if (item == Items.CHEST_MINECART) return EntityType.CHEST_MINECART;
-        if (item == Items.FURNACE_MINECART) return EntityType.FURNACE_MINECART;
-        if (item == Items.TNT_MINECART) return EntityType.TNT_MINECART;
-        if (item == Items.HOPPER_MINECART) return EntityType.HOPPER_MINECART;
-        if (item == Items.COMMAND_BLOCK_MINECART) return EntityType.COMMAND_BLOCK_MINECART;
+        if (item == Items.MINECART) return minecartType("minecart");
+        if (item == Items.CHEST_MINECART) return minecartType("chest_minecart");
+        if (item == Items.FURNACE_MINECART) return minecartType("furnace_minecart");
+        if (item == Items.TNT_MINECART) return minecartType("tnt_minecart");
+        if (item == Items.HOPPER_MINECART) return minecartType("hopper_minecart");
+        if (item == Items.COMMAND_BLOCK_MINECART) return minecartType("command_block_minecart");
         return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static EntityType<? extends AbstractMinecart> minecartType(String path) {
+        return (EntityType<? extends AbstractMinecart>) BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace(path));
     }
 
     public Pose getPose(BlockState state, BlockPos pos) {
@@ -247,11 +387,6 @@ public class TrackTiesBlock extends DirectionalBlock implements EntityBlock {
         basis.rotate(normal.getRotation());
 
         return new Pose(pos, basis);
-    }
-
-    @Override
-    protected MapCodec<? extends DirectionalBlock> codec() {
-        return CODEC;
     }
 
     @Nullable
