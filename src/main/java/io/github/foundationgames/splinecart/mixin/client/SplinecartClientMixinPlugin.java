@@ -3,7 +3,7 @@ package io.github.foundationgames.splinecart.mixin.client;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import net.fabricmc.loader.api.FabricLoader;
+import net.neoforged.fml.ModList;
 
 import java.util.List;
 import java.util.Set;
@@ -21,7 +21,7 @@ public class SplinecartClientMixinPlugin implements IMixinConfigPlugin {
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         if (mixinClassName.endsWith("WorldRendererMixin")) {
-            return !FabricLoader.getInstance().isModLoaded("sodium");
+            return !ModList.get().isLoaded("sodium");
         }
         return true;
     }

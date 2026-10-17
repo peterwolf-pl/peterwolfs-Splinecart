@@ -1,6 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
+  "category": "redstone",
   "key": {
     "A": "minecraft:activator_rail",
     "B": "minecraft:iron_block",

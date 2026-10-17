@@ -6,10 +6,10 @@
   "item.splinecart.chain_drive_track": "Chain Drive Track",
   "item.splinecart.magnetic_track": "Magnetic Track",
 
-  "item.splinecart.track_ties.desc": "Interact to rotate when placed",
+  "item.splinecart.track_ties.desc": "Place in air or on blocks. Look down for floor, ahead for wall, up for ceiling. Interact to rotate. Outputs redstone when a minecart passes",
   "item.splinecart.track.desc": "Links two Track Ties blocks together",
   "item.splinecart.chain_drive_track.desc": "Track variant that pulls minecarts",
-  "item.splinecart.magnetic_track.desc": "Track variant that accelerates or slows minecarts",
+  "item.splinecart.magnetic_track.desc": "Accelerates with redstone power. Unpowered magnetic track stops minecarts",
 
   "item.splinecart.track.origin": "First track selected",
   "item.splinecart.track.clear_hint": "Cancel first selection by using on a non-track block",
@@ -26,5 +26,20 @@
   "splinecart.config.splinecart_client.rotate_camera.desc": "Recommended to be set to 'false' for users prone to motion sickness. When set to 'false', your player camera orientation will remain level while riding a non-level Splinecart track. Non-level tracks are best experienced in third person when 'rotate_camera' is set to 'false'.",
   "splinecart.config.splinecart_client.vbos.desc": "Use vertex buffer objects to render tracks. Drastically increases performance when enabled, however prone to visual artifacts and compatibility issues.",
   "splinecart.config.splinecart_client.track_resolution.desc": "Higher values decrease performance and increase visual quality. Determines how many segments tracks will be cut into when rendering, with fewer segments making tracks appear jagged. Does not affect minecart movement along tracks.",
-  "splinecart.config.splinecart_client.track_render_distance.desc": "When the origin track tie block is this many chunks away from you, its track will stop rendering."
+  "splinecart.config.splinecart_client.track_render_distance.desc": "When the origin track tie block is this many chunks away from you, its track will stop rendering.",
+
+  "commands.splinecart.unknown_track_type": "Unknown track type. Use default, chain_drive, or magnetic.",
+  "commands.splinecart.unknown_support_mode": "Unknown support mode. Use none, wood, metal, steel, or auto.",
+  "commands.splinecart.supports_player_only": "This command can only be used by a player.",
+  "commands.splinecart.supports_query": "Spline track supports are set to %s.",
+  "commands.splinecart.supports_set": "Spline track supports set to %s. All subsequent tracks will use this mode.",
+  "commands.splinecart.banking_player_only": "This command can only be used by a player.",
+  "commands.splinecart.banking_query": "Spline track banking is %s.",
+  "commands.splinecart.banking_set": "Spline track banking set to %s. All subsequent tracks will use this mode.",
+  "commands.splinecart.need_two_positions": "At least two positions are required to build a spline track.",
+  "commands.splinecart.build_failed": "Could not place track ties at the requested positions.",
+  "commands.splinecart.connect_failed": "Could not connect track ties at %s %s %s and %s %s %s.",
+  "commands.splinecart.connect_success": "Connected %s track with %s supports from %s %s %s to %s %s %s.",
+  "commands.splinecart.build_line_success": "Built %s segments of %s track with %s supports.",
+  "commands.splinecart.build_path_success": "Built a %s-segment %s track path with %s supports."
 }

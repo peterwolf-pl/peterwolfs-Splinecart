@@ -5,6 +5,7 @@ import io.github.foundationgames.splinecart.Splinecart;
 import io.github.foundationgames.splinecart.block.TrackTiesBlockEntity;
 import io.github.foundationgames.splinecart.entity.TrackFollowerEntity;
 import io.github.foundationgames.splinecart.util.SUtil;
+import io.github.foundationgames.splinecart.util.VanillaRailHandoff;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
 import net.minecraft.world.phys.Vec3;
@@ -23,7 +24,7 @@ public class EntityMixin {
     private void splinecart$getOnTrackIfNecessary(double x, double y, double z, CallbackInfo info) {
         var self = (Entity)(Object)this;
         var world = self.level();
-        if (world.isClientSide() || !(self.getType().builtInRegistryHolder().is(Splinecart.CARTS) || self instanceof AbstractMinecart) || self.getVehicle() != null || self.getDeltaMovement().horizontalDistanceSqr() < 0.00005) {
+        if (world.isClientSide() || !(self.getType().builtInRegistryHolder().is(Splinecart.CARTS) || self instanceof AbstractMinecart) || self.getVehicle() != null || self.getDeltaMovement().horizontalDistanceSqr() < 0.00005 || VanillaRailHandoff.isLeaving(self)) {
             return;
         }
 

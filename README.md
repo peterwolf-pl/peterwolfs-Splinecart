@@ -1,2 +1,5 @@
-# Splinecart by https://github.com/FoundationGames 
-port to 26.1.2 Fabric by peterwolf.pl
+# Splinecart
+
+Use `/splinecart banking on` to make newly linked curved spline tracks bank into
+their turns. `/splinecart banking off` disables the build mode and
+`/splinecart banking toggle` switches it quickly.

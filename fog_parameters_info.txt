@@ -1,0 +1,21 @@
+Loaded successfully: net.minecraft.client.renderer.fog.FogData
+Constructors:
+  public net.minecraft.client.renderer.fog.FogData()
+Methods:
+
+Loaded successfully: net.minecraft.client.renderer.fog.FogRenderer
+Constructors:
+  public net.minecraft.client.renderer.fog.FogRenderer()
+Methods:
+  public void net.minecraft.client.renderer.fog.FogRenderer.close()
+  private void net.minecraft.client.renderer.fog.FogRenderer.computeFogColor(net.minecraft.client.Camera,float,net.minecraft.client.multiplayer.ClientLevel,int,float,org.joml.Vector4f)
+  public void net.minecraft.client.renderer.fog.FogRenderer.endFrame()
+  public com.mojang.blaze3d.buffers.GpuBufferSlice net.minecraft.client.renderer.fog.FogRenderer.getBuffer(net.minecraft.client.renderer.fog.FogRenderer$FogMode)
+  private net.minecraft.world.level.material.FogType net.minecraft.client.renderer.fog.FogRenderer.getFogType(net.minecraft.client.Camera)
+  private static java.lang.String net.minecraft.client.renderer.fog.FogRenderer.lambda$new$0()
+  private static java.lang.String net.minecraft.client.renderer.fog.FogRenderer.lambda$new$1()
+  public net.minecraft.client.renderer.fog.FogData net.minecraft.client.renderer.fog.FogRenderer.setupFog(net.minecraft.client.Camera,int,net.minecraft.client.DeltaTracker,float,net.minecraft.client.multiplayer.ClientLevel)
+  public static boolean net.minecraft.client.renderer.fog.FogRenderer.toggleFog()
+  private void net.minecraft.client.renderer.fog.FogRenderer.updateBuffer(java.nio.ByteBuffer,int,org.joml.Vector4f,float,float,float,float,float,float)
+  public void net.minecraft.client.renderer.fog.FogRenderer.updateBuffer(net.minecraft.client.renderer.fog.FogData)
+

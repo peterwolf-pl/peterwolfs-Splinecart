@@ -1,0 +1,44 @@
+
+> Configure project :
+Fabric Loom: 1.17.12
+
+> Task :compileJava FAILED
+/Users/piotrek/Documents/java/peterwolfs-Splinecart/src/main/java/io/github/foundationgames/splinecart/entity/TrackFollowerEntity.java:295: error: moveOrInterpolateTo(Vec3,float,float) in TrackFollowerEntity cannot override moveOrInterpolateTo(Vec3,float,float) in Entity
+    public void moveOrInterpolateTo(Vec3 position, float yaw, float pitch) {
+                ^
+  overridden method is final
+/Users/piotrek/Documents/java/peterwolfs-Splinecart/src/main/java/io/github/foundationgames/splinecart/mixin/EntityMixin.java:83: error: cannot find symbol
+                    return new Vec3(camPos.x(), camPos.y(), camPos.z()).add(trackFollower.lerpPosition(tickDelta));
+                                                                                         ^
+  symbol:   method lerpPosition(float)
+  location: variable trackFollower of type TrackFollowerEntity
+/Users/piotrek/Documents/java/peterwolfs-Splinecart/src/main/java/io/github/foundationgames/splinecart/block/TrackTiesBlock.java:81: error: method does not override or implement a method from a supertype
+    @Override
+    ^
+/Users/piotrek/Documents/java/peterwolfs-Splinecart/src/main/java/io/github/foundationgames/splinecart/block/TrackTiesBlock.java:91: error: cannot find symbol
+        super.onRemove(state, world, pos, newState, moved);
+             ^
+  symbol: method onRemove(BlockState,Level,BlockPos,BlockState,boolean)
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+4 errors
+
+[Incubating] Problems report is available at: file:///Users/piotrek/Documents/java/peterwolfs-Splinecart/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava' (registered by plugin class 'org.gradle.api.plugins.JavaBasePlugin').
+> Compilation failed; see the compiler output below.
+  /Users/piotrek/Documents/java/peterwolfs-Splinecart/src/main/java/io/github/foundationgames/splinecart/entity/TrackFollowerEntity.java:295: error: moveOrInterpolateTo(Vec3,float,float) in TrackFollowerEntity cannot override moveOrInterpolateTo(Vec3,float,float) in Entity
+      public void moveOrInterpolateTo(Vec3 position, float yaw, float pitch) {
+                  ^
+    overridden method is final
+  4 errors
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 1s
+1 actionable task: 1 executed

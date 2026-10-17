@@ -4,7 +4,9 @@ import io.github.foundationgames.splinecart.Splinecart;
 import io.github.foundationgames.splinecart.TrackType;
 import io.github.foundationgames.splinecart.block.TrackTiesBlockEntity;
 import io.github.foundationgames.splinecart.util.SUtil;
+import io.github.foundationgames.splinecart.util.TrackBanking;
 import io.github.foundationgames.splinecart.util.TrackProgress;
+import io.github.foundationgames.splinecart.util.VanillaRailHandoff;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.InterpolationHandler;
@@ -33,6 +35,8 @@ public class TrackFollowerEntity extends Entity {
     public static final double CHAIN_DRIVE_SPEED = 0.36;
     public static final double MAGNETIC_SPEED_FACTOR = 1.6;
     public static final double MAGNETIC_ACCEL = 0.07;
+    public static final double MAGNETIC_BRAKE = 0.4;
+    public static final double MAGNETIC_STOP_THRESHOLD = 0.25;
 
     private static final double GRAVITY = 0.04;
 
@@ -62,7 +66,7 @@ public class TrackFollowerEntity extends Entity {
     }
 
     public TrackFollowerEntity(Level world) {
-        this(Splinecart.TRACK_FOLLOWER, world);
+        this(Splinecart.TRACK_FOLLOWER.get(), world);
     }
 
     public static @Nullable TrackFollowerEntity create(Level world, Vec3 startPos, BlockPos tie, Vec3 velocity) {
@@ -89,7 +93,8 @@ public class TrackFollowerEntity extends Entity {
         }
 
         var startE = TrackTiesBlockEntity.of(world, start);
-        if (startE != null) {
+        var endE = TrackTiesBlockEntity.of(world, end);
+        if (startE != null && endE != null) {
             var follower = new TrackFollowerEntity(world);
             follower.trackVelocity = trackVelocity;
             follower.splinePieceProgress = progress;
@@ -117,7 +122,8 @@ public class TrackFollowerEntity extends Entity {
 
         var position = new Vector3d();
         var derivative = new Vector3d();
-        startE.pose().interpolate(endE.pose(), follower.splinePieceProgress, position, follower.basis, derivative);
+        TrackBanking.interpolate(startE.pose(), endE.pose(), startE.nextBanking(), follower.splinePieceProgress,
+                position, follower.basis, derivative);
         follower.motionScale = derivative.lengthSquared() > 1.0e-8 ? 1.0 / derivative.length() : 0.0;
         follower.setPos(position.x(), position.y(), position.z());
         follower.getEntityData().set(TRACK_PROGRESS, TrackProgress.of(startE, follower.splinePieceProgress));
@@ -168,6 +174,45 @@ public class TrackFollowerEntity extends Entity {
         return this.basis;
     }
 
+    /**
+     * Public movement bridge for mods which propel a cart carried by this follower.
+     */
+    public double splinecart$getTrackVelocity() {
+        if (this.level().isClientSide()) {
+            var motion = this.getClientMotion();
+            var direction = this.splinecart$getTrackDirection();
+            return motion.x() * direction.x + motion.y() * direction.y + motion.z() * direction.z;
+        }
+        return this.trackVelocity;
+    }
+
+    /**
+     * Returns the positive direction of the current spline segment.
+     */
+    public Vec3 splinecart$getTrackDirection() {
+        var direction = new Vector3d(0, 0, 1);
+        if (this.level().isClientSide()) {
+            this.clientOrientation.transform(direction);
+        } else {
+            direction.mul(this.basis);
+        }
+        if (direction.lengthSquared() <= 1.0e-8) {
+            return Vec3.ZERO;
+        }
+        direction.normalize();
+        return new Vec3(direction.x(), direction.y(), direction.z());
+    }
+
+    /**
+     * Lets a propulsion/constraint mod update motion without applying a fake
+     * world-space velocity to the passenger minecart.
+     */
+    public void splinecart$setTrackVelocity(double velocity) {
+        if (Double.isFinite(velocity)) {
+            this.trackVelocity = velocity;
+        }
+    }
+
     public void destroy() {
         this.remove(RemovalReason.KILLED);
     }
@@ -182,12 +227,39 @@ public class TrackFollowerEntity extends Entity {
         return false;
     }
 
-    private void flyOffTrack(Entity firstPassenger) {
-        firstPassenger.stopRiding();
+    private void flyOffTrack(Entity firstPassenger, TrackTiesBlockEntity startE, TrackTiesBlockEntity endE, double extraT) {
+        var pos = new Vector3d();
+        var deriv = new Vector3d();
+        TrackBanking.interpolate(startE.pose(), endE.pose(), startE.nextBanking(), this.splinePieceProgress,
+                pos, this.basis, deriv);
+        this.setPos(pos.x(), pos.y(), pos.z());
+
+        if (Math.abs(extraT) > 1.0e-8 && deriv.lengthSquared() > 1.0e-8) {
+            pos.fma(extraT, deriv);
+        }
 
         var newVel = new Vector3d(0, 0, this.trackVelocity).mul(this.basis);
-        firstPassenger.setDeltaMovement(new Vec3(newVel.x(), newVel.y(), newVel.z()));
+        var velocity = new Vec3(newVel.x(), newVel.y(), newVel.z());
+
+        firstPassenger.stopRiding();
+        firstPassenger.setPos(pos.x(), pos.y(), pos.z());
+        VanillaRailHandoff.transferToRail(firstPassenger, velocity);
         this.destroy();
+    }
+
+    private static void occupyNearTies(TrackTiesBlockEntity startE, TrackTiesBlockEntity endE, double t) {
+        double length = startE.estimatedTrackLength();
+        if (length < 1.0e-6) {
+            startE.occupyFromCart();
+            endE.occupyFromCart();
+            return;
+        }
+        if (t * length <= 0.8) {
+            startE.occupyFromCart();
+        }
+        if ((1.0 - t) * length <= 0.8) {
+            endE.occupyFromCart();
+        }
     }
 
     protected void updateServer() {
@@ -215,25 +287,29 @@ public class TrackFollowerEntity extends Entity {
 
                 this.splinePieceProgress += this.trackVelocity * this.motionScale;
                 if (this.splinePieceProgress > 1) {
-                    this.splinePieceProgress -= 1;
-
+                    endE.occupyFromCart();
                     var nextE = endE.next();
                     if (nextE == null) {
-                        this.flyOffTrack(passenger);
+                        double extraT = this.splinePieceProgress - 1.0;
+                        this.splinePieceProgress = 1.0;
+                        this.flyOffTrack(passenger, startE, endE, extraT);
                         return;
                     } else {
+                        this.splinePieceProgress -= 1;
                         this.setStretch(this.endTie, nextE.getBlockPos());
                         startE = endE;
                         endE = nextE;
                     }
                 } else if (this.splinePieceProgress < 0) {
-                    this.splinePieceProgress += 1;
-
+                    startE.occupyFromCart();
                     var prevE = startE.prev();
                     if (prevE == null) {
-                        this.flyOffTrack(passenger);
+                        double extraT = this.splinePieceProgress;
+                        this.splinePieceProgress = 0.0;
+                        this.flyOffTrack(passenger, startE, endE, extraT);
                         return;
                     } else {
+                        this.splinePieceProgress += 1;
                         this.setStretch(prevE.getBlockPos(), this.startTie);
                         endE = startE;
                         startE = prevE;
@@ -242,7 +318,8 @@ public class TrackFollowerEntity extends Entity {
 
                 var pos = new Vector3d();
                 var deriv = new Vector3d(); // Change in position per change in spline progress
-                startE.pose().interpolate(endE.pose(), this.splinePieceProgress, pos, this.basis, deriv);
+                TrackBanking.interpolate(startE.pose(), endE.pose(), startE.nextBanking(), this.splinePieceProgress,
+                        pos, this.basis, deriv);
 
                 this.setPos(pos.x(), pos.y(), pos.z());
                 this.getEntityData().set(TRACK_PROGRESS, TrackProgress.of(startE, this.splinePieceProgress));
@@ -275,6 +352,7 @@ public class TrackFollowerEntity extends Entity {
                 var gradeVec = new Vector3d(0, 1, 0).mul(this.basis);
                 gradeVec.mul(1, 0, 1);
                 int power = Math.max(startE.power(), endE.power());
+                occupyNearTies(startE, endE, this.splinePieceProgress);
 
                 this.trackVelocity += gravity;
                 this.trackVelocity = startE.nextType().motion.calculate(this.trackVelocity, gradeVec.length(), power);
@@ -320,8 +398,8 @@ public class TrackFollowerEntity extends Entity {
             }
 
             var targetBasis = new Matrix3d();
-            progress.startPose().interpolate(
-                    progress.endPose(), progress.t(), new Vector3d(), targetBasis, new Vector3d());
+            TrackBanking.interpolate(progress.startPose(), progress.endPose(), progress.banking(), progress.t(),
+                    new Vector3d(), targetBasis, new Vector3d());
             targetBasis.getNormalizedRotation(this.targetClientOrientation);
 
             if (this.firstProgUpdate) {

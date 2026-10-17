@@ -1,15 +1,11 @@
 package io.github.foundationgames.splinecart.util;
 
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import com.mojang.math.Axis;
 import org.joml.Quaternionf;
 import org.joml.Vector3dc;
 import org.joml.Vector3f;
 
-import java.util.function.BiFunction;
 import java.util.function.DoubleSupplier;
 
 public enum SUtil {;
@@ -30,11 +26,6 @@ public enum SUtil {;
     public static final Quaternionf BACKWARDS = Axis.YP.rotation(Mth.PI);
     public static DoubleSupplier TICK_DELTA = () -> 0;
 
-    public static <V, T extends V> T register(Registry<V> registry, Identifier id, BiFunction<Identifier, ResourceKey<V>, T> obj) {
-        ResourceKey<V> key = ResourceKey.create(registry.key(), id);
-        return Registry.register(registry, id, obj.apply(id, key));
-    }
-
     public static boolean failsSanityCheck(Vector3dc vec) {
         return Double.isNaN(vec.x()) || Double.isNaN(vec.y()) || Double.isNaN(vec.z());
     }
@@ -43,3 +34,4 @@ public enum SUtil {;
         return Double.isNaN(rot.x()) || Double.isNaN(rot.y()) || Double.isNaN(rot.z()) || Double.isNaN(rot.w());
     }
 }
+
